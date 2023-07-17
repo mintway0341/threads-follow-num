@@ -3,13 +3,24 @@ import { ThreadsAPI } from "threads-api";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const threadsAPI = new ThreadsAPI();
   const username = searchParams.get("username");
+  const password = searchParams.get("password");
+  const threadsAPI = new ThreadsAPI({
+    username: username,
+    password: password,
+  });
   const userID = await threadsAPI.getUserIDfromUsername(username);
-  if (!userID) {
-    return NextResponse.json({});
-  }
-  const user = await threadsAPI.getUserProfile(username, userID);
+  let { users: followers, next_max_id: cursor1 } =
+    await threadsAPI.getUserFollowers(userID);
+  followers = followers.map((el) => {
+    return el["username"];
+  });
 
-  return NextResponse.json({ user });
+  let { users: following, next_max_id: cursor2 } =
+    await threadsAPI.getUserFollowings(userID);
+  following = following.map((el) => {
+    return el["username"];
+  });
+
+  return NextResponse.json({ followers: followers, following: following });
 }

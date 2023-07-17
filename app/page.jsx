@@ -2,30 +2,48 @@
 
 import { useState } from "react";
 import { styled } from "styled-components";
-import { ThreadsAPI } from "threads-api";
 import bbblury from "/public/bbblurry.svg";
 import threads from "/public/threads.png";
 import Image from "next/image";
 
 export default function Home() {
   const [username, setUsername] = useState("");
-  const [tableData, setTableData] = useState([
-    "username1",
-    "username2",
-    "username3",
-    "username4",
-    "username5",
-    "username6",
-    "username7",
-    "username8",
-    "username9",
-    "username10",
-  ]);
+  const [password, setPassword] = useState("");
+  const [selected, setSelected] = useState(1);
+  const [tableData, setTableData] = useState([]);
+  const [followers, setFollowers] = useState([]);
+  const [following, setFollowing] = useState([]);
+  const [ok, setOk] = useState("확인");
   const onBtnClickHandler = async () => {
-    const { user } = await (await fetch(`/api?username=${username}`)).json();
-    if (user === undefined) {
-      alert("유저 정보가 없습니다.");
-      return;
+    try {
+      setOk("로딩중");
+      const data = await (
+        await fetch(`/api?username=${username}&password=${password}`)
+      ).json();
+      setOk("확인");
+      setFollowers(data.followers);
+      setFollowing(data.following);
+      const werMinusIng = data.followers.filter(
+        (el) => !data.following.includes(el)
+      );
+      const ingMinusWer = data.following.filter(
+        (el) => !data.followers.includes(el)
+      );
+      switch (selected) {
+        case 1:
+          setTableData(data.followers);
+          break;
+        case 2:
+          setTableData(data.following);
+          break;
+        case 3:
+          setTableData(ingMinusWer);
+          break;
+        case 4:
+          setTableData(werMinusIng);
+      }
+    } catch (e) {
+      alert("비밀번호를 확인해주세요.");
     }
   };
 
@@ -36,6 +54,7 @@ export default function Home() {
         <MainContainer>
           <Title>쓰팔넘 : Threads Follow Numbers</Title>
           <Description>쓰레드 언팔 확인</Description>
+          <Notice>*비밀번호를 수집하지 않습니다. 걱정마세요.</Notice>
           <Row>
             <NameInput
               placeholder="username"
@@ -44,20 +63,69 @@ export default function Home() {
                 setUsername(e.target.value);
               }}
             />
-            <Btn onClick={onBtnClickHandler}>확인</Btn>
+            <NameInput
+              placeholder="password"
+              value={password}
+              type="password"
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
+            <Btn onClick={onBtnClickHandler}>{ok}</Btn>
           </Row>
+          <TableSelectRow>
+            <TableSelect
+              bgColor={selected === 1 ? "#ffffff80" : "transparent"}
+              onClick={() => {
+                setSelected(1);
+                setTableData(followers);
+              }}
+            >
+              팔로워
+            </TableSelect>
+            <TableSelect
+              bgColor={selected === 2 ? "#ffffff80" : "transparent"}
+              onClick={() => {
+                setSelected(2);
+                setTableData(following);
+              }}
+            >
+              팔로잉
+            </TableSelect>
+            <TableSelect
+              bgColor={selected === 3 ? "#ffffff80" : "transparent"}
+              onClick={() => {
+                setSelected(3);
+                setTableData(following.filter((el) => !followers.includes(el)));
+              }}
+            >
+              팔로잉 - 팔로워
+            </TableSelect>
+            <TableSelect
+              bgColor={selected === 4 ? "#ffffff80" : "transparent"}
+              onClick={() => {
+                setSelected(4);
+                setTableData(followers.filter((el) => !following.includes(el)));
+              }}
+            >
+              팔로워 - 팔로잉
+            </TableSelect>
+          </TableSelectRow>
           <Table>
-            {tableData.map((e) => (
-              <Card key={e}>
-                <p>{e}</p>
-                <ThreadsImage
-                  src={threads}
-                  onClick={() => {
-                    window.open(`https://www.threads.net/@${e}`);
-                  }}
-                />
-              </Card>
-            ))}
+            {tableData
+              ? tableData.map((e) => (
+                  <Card key={e}>
+                    <p>{e}</p>
+                    <ThreadsImage
+                      src={threads}
+                      alt={e}
+                      onClick={() => {
+                        window.open(`https://www.threads.net/@${e}`);
+                      }}
+                    />
+                  </Card>
+                ))
+              : null}
           </Table>
         </MainContainer>
       </Bg>
@@ -113,12 +181,19 @@ const Description = styled.p`
   font-size: 16px;
   font-weight: 500;
   color: white;
-  margin-top: 6px;
+  margin-top: 0px;
+`;
+const Notice = styled.p`
+  font-size: 10px;
+  font-weight: 400;
+  color: white;
+  margin-top: 10px;
 `;
 const Row = styled.div`
   display: flex;
   flex-direction: row;
   margin-top: 30px;
+  gap: 5px;
 `;
 const NameInput = styled.input`
   background-color: transparent;
@@ -143,22 +218,53 @@ const NameInput = styled.input`
 `;
 const Btn = styled.button`
   cursor: pointer;
-  background-color: #7b61ff;
+  background-color: #4a74ff;
   color: white;
   font-weight: 700;
   border: none;
-  box-shadow: 0px 5px 10px 5px #7b61ff30;
+  box-shadow: 0px 5px 10px 5px #4a74ff30;
   border-radius: 5px;
   padding: 5px 10px;
-  margin-left: 10px;
   &:hover {
-    background-color: #6c54e3;
-    box-shadow: 0px 5px 10px 5px #7b61ff50;
+    background-color: #3f65e0;
+    box-shadow: 0px 5px 10px 5px #4a74ff50;
+  }
+`;
+const TableSelectRow = styled.div`
+  width: 75vw;
+  max-width: 600px;
+  margin-top: 30px;
+  display: flex;
+  flex-direction: row;
+  background-color: #ffffff40;
+  border-left: 1px solid #ffffff30;
+  border-top: 1px solid #ffffff30;
+  border-radius: 40px;
+  backdrop-filter: blur(120px);
+  -webkit-backdrop-filter: blur(120px);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+`;
+const TableSelect = styled.div`
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  padding: 10px 4px;
+  word-break: keep-all;
+  background-color: ${(props) => props.bgColor};
+  text-shadow: none;
+  &:hover {
+    background-color: #ffffff50;
   }
 `;
 const Table = styled.div`
   height: 60vh;
-  margin-top: 50px;
+  margin-top: 20px;
   gap: 10px;
   overflow: scroll;
   padding: 0 3vw;
