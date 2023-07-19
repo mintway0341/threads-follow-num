@@ -55,7 +55,7 @@ export default function Home() {
           <Title>쓰팔넘 : Threads Follow Numbers</Title>
           <Description>쓰레드 언팔 확인</Description>
           <Notice>*비밀번호를 수집하지 않습니다. 걱정마세요.</Notice>
-          <Row>
+          <Column>
             <NameInput
               placeholder="username"
               value={username}
@@ -72,7 +72,7 @@ export default function Home() {
               }}
             />
             <Btn onClick={onBtnClickHandler}>{ok}</Btn>
-          </Row>
+          </Column>
           <TableSelectRow>
             <TableSelect
               bgColor={selected === 1 ? "#ffffff80" : "transparent"}
@@ -189,9 +189,9 @@ const Notice = styled.p`
   color: white;
   margin-top: 10px;
 `;
-const Row = styled.div`
+const Column = styled.div`
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   margin-top: 30px;
   gap: 5px;
 `;
