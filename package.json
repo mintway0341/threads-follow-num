@@ -16,6 +16,6 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "styled-components": "^6.0.3",
-    "threads-api": "^1.4.6"
+    "threads-api": "^1.5.1"
   }
 }

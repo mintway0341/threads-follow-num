@@ -43,6 +43,7 @@ export default function Home() {
           setTableData(werMinusIng);
       }
     } catch (e) {
+      setOk("확인");
       alert("비밀번호를 확인해주세요.");
     }
   };
